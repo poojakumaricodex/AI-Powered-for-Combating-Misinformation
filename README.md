@@ -1,17 +1,17 @@
- # TruthGuard – AI-Powered Misinformation Detector
+# 🚨 TruthGuard – AI-Powered Misinformation Detector
 
 **TruthGuard** is an AI-powered tool designed to help users detect and combat misinformation online. It analyzes content for red flags like sensational headlines, conspiracy language, and unverified medical claims, then provides educational insights and actionable recommendations to promote critical thinking and media literacy.
 
 ---
 
-## 🌟 Features
+## 🌟 Key Features
 
-- **Red Flag Detection:** Identifies sensational headlines, conspiracy language, and unverified medical claims.
-- **Confidence Score:** Assigns a probability score indicating the likelihood of misinformation.
-- **Detailed Analysis:** Breaks down content issues like emotional language, source credibility, and context.
-- **Credibility Assessment:** Rates the content’s trustworthiness as low, medium, or high risk.
-- **Actionable Recommendations:** Suggests verification steps such as checking sources and author credibility.
-- **Interactive Interface:** Users can paste content and receive immediate feedback.
+- 🔴 **Red Flag Detection** – Spots sensational, misleading, or unverified claims  
+- 📊 **Confidence Score** – Shows likelihood of misinformation  
+- 📝 **Detailed Analysis** – Highlights emotional language, source credibility, and context  
+- ✅ **Credibility Assessment** – Rates content as low, medium, or high risk  
+- 💡 **Actionable Recommendations** – Tips for verification  
+- 🖱️ **Interactive Interface** – Paste content and get instant feedback  
 
 ---
 
