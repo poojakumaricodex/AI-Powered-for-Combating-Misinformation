@@ -1,0 +1,1779 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TruthGuard - AI Misinformation Detector</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&display=swap');
+        
+        body { 
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            background: #0a0e1a;
+            color: #e2e8f0;
+            overflow-x: hidden;
+        }
+        
+        .cyber-font {
+            font-family: 'Orbitron', monospace;
+        }
+        
+        /* Animated Cyber Grid Background */
+        .cyber-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(6, 182, 212, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(6, 182, 212, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
+            z-index: -1;
+        }
+        
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+        
+        /* Glassmorphism Cards */
+        .glass-card {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(6, 182, 212, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        
+        .glass-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(6, 182, 212, 0.2);
+            border-color: rgba(6, 182, 212, 0.4);
+        }
+        
+        /* Pulsing Shield Animation */
+        .pulse-shield {
+            animation: pulseShield 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulseShield {
+            0%, 100% { 
+                transform: scale(1);
+                filter: drop-shadow(0 0 10px rgba(6, 182, 212, 0.5));
+            }
+            50% { 
+                transform: scale(1.05);
+                filter: drop-shadow(0 0 20px rgba(6, 182, 212, 0.8));
+            }
+        }
+        
+        /* Gradient Text */
+        .gradient-text {
+            background: linear-gradient(135deg, #06b6d4, #0891b2, #0e7490);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        /* Cyber Button */
+        .cyber-button {
+            background: linear-gradient(135deg, #0891b2, #0e7490);
+            border: 1px solid #06b6d4;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .cyber-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .cyber-button:hover::before {
+            left: 100%;
+        }
+        
+        /* FAKE/REAL Result Badges */
+        .result-badge-fake {
+            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            border: 2px solid #ef4444;
+            box-shadow: 0 0 30px rgba(239, 68, 68, 0.5);
+            animation: pulseRed 2s ease-in-out infinite;
+        }
+        
+        .result-badge-real {
+            background: linear-gradient(135deg, #059669, #047857);
+            border: 2px solid #10b981;
+            box-shadow: 0 0 30px rgba(16, 185, 129, 0.5);
+            animation: pulseGreen 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulseRed {
+            0%, 100% { box-shadow: 0 0 30px rgba(239, 68, 68, 0.5); }
+            50% { box-shadow: 0 0 50px rgba(239, 68, 68, 0.8); }
+        }
+        
+        @keyframes pulseGreen {
+            0%, 100% { box-shadow: 0 0 30px rgba(16, 185, 129, 0.5); }
+            50% { box-shadow: 0 0 50px rgba(16, 185, 129, 0.8); }
+        }
+        
+        /* Confidence Meter */
+        .confidence-meter {
+            background: linear-gradient(90deg, #dc2626 0%, #f59e0b 50%, #059669 100%);
+            height: 12px;
+            border-radius: 6px;
+            position: relative;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .confidence-indicator {
+            position: absolute;
+            top: -4px;
+            width: 20px;
+            height: 20px;
+            background: #06b6d4;
+            border: 3px solid #0a0e1a;
+            border-radius: 50%;
+            transition: left 0.8s ease;
+            box-shadow: 0 0 15px rgba(6, 182, 212, 0.8);
+        }
+        
+        /* Scanning Animation */
+        .scanning {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .scanning::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(6, 182, 212, 0.3), transparent);
+            animation: scan 2s linear infinite;
+        }
+        
+        @keyframes scan {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+        
+        /* Glowing Effects */
+        .glow-cyan {
+            box-shadow: 0 0 20px rgba(6, 182, 212, 0.3);
+        }
+        
+        .glow-red {
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+        }
+        
+        .glow-green {
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+        }
+        
+        /* Rotating Icon */
+        .rotate-slow {
+            animation: rotateSlow 8s linear infinite;
+        }
+        
+        @keyframes rotateSlow {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .mobile-app-container {
+            max-width: 100%;
+            margin: 0 auto;
+        }
+        
+        @media (min-width: 768px) {
+            .mobile-app-container {
+                max-width: 768px;
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            .mobile-app-container {
+                max-width: 1200px;
+            }
+        }
+        
+        .analysis-card {
+            transition: all 0.3s ease;
+            transform: translateY(10px);
+            opacity: 0;
+        }
+        
+        .analysis-card.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        .credibility-meter {
+            background: linear-gradient(90deg, #ef4444 0%, #f59e0b 50%, #10b981 100%);
+            height: 8px;
+            border-radius: 4px;
+            position: relative;
+        }
+        
+        .credibility-indicator {
+            position: absolute;
+            top: -2px;
+            width: 12px;
+            height: 12px;
+            background: white;
+            border: 2px solid #374151;
+            border-radius: 50%;
+            transition: left 0.5s ease;
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .typing-animation {
+            border-right: 2px solid #667eea;
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 50% { border-color: transparent; }
+            51%, 100% { border-color: #667eea; }
+        }
+        
+        .mobile-header {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            backdrop-filter: blur(10px);
+        }
+        
+        .floating-action {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 40;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        
+        .card-mobile {
+            margin: 0 -1rem;
+            border-radius: 0;
+        }
+        
+        @media (min-width: 640px) {
+            .card-mobile {
+                margin: 0;
+                border-radius: 0.75rem;
+            }
+        }
+        
+        .translator-dropdown {
+            position: relative;
+            z-index: 3000;
+        }
+        
+        .translator-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            background-color: white;
+            min-width: 200px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            border-radius: 8px;
+            z-index: 4000 !important;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .translator-content.show {
+            display: block;
+        }
+
+        .glass-card, .card-mobile {
+            overflow: visible !important;
+        }
+
+      
+        .language-option {
+            padding: 12px 16px;
+            cursor: pointer;
+            border-bottom: 1px solid #f3f4f6;
+            transition: background-color 0.2s;
+        }
+        
+        .language-option:hover {
+            background-color: #f9fafb;
+        }
+        
+        .language-option:last-child {
+            border-bottom: none;
+        }
+        
+        .translating {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        
+        .translate-indicator {
+            display: inline-block;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-top: 1px solid #e5e7eb;
+            z-index: 30;
+            display: block;
+        }
+        
+        @media (min-width: 768px) {
+            .bottom-nav {
+                display: none;
+            }
+        }
+        
+        .mobile-padding {
+            padding-bottom: 80px;
+        }
+        
+        @media (min-width: 768px) {
+            .mobile-padding {
+                padding-bottom: 2rem;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- Animated Cyber Grid Background -->
+    <div class="cyber-grid"></div>
+    <!-- Header -->
+    <header class="mobile-header glass-card text-white py-4 md:py-6 shadow-lg relative z-10">
+        <div class="mobile-app-container px-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-br from-cyan-400 to-blue-600 rounded-full flex items-center justify-center pulse-shield">
+                        <span class="text-xl md:text-2xl">🛡️</span>
+                    </div>
+                    <div>
+                        <h1 class="text-xl md:text-3xl font-bold cyber-font gradient-text">TruthGuard</h1>
+                        <p class="text-xs md:text-sm text-cyan-300 hidden sm:block">AI-Powered Misinformation Detector</p>
+                    </div>
+                </div>
+                <div class="hidden lg:flex items-center space-x-6">
+                    <div class="flex items-center space-x-2 text-sm text-cyan-300">
+                        <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+                        <span>🔒 Secure</span>
+                    </div>
+                    <div class="flex items-center space-x-2 text-sm text-cyan-300">
+                        <span class="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></span>
+                        <span>⚡ Fast</span>
+                    </div>
+                    <div class="flex items-center space-x-2 text-sm text-cyan-300">
+                        <span class="w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></span>
+                        <span>🎯 Accurate</span>
+                    </div>
+                </div>
+                <div class="md:hidden">
+                    <button class="text-cyan-300 p-2 hover:text-white transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="mobile-app-container px-4 py-4 md:py-8 mobile-padding">
+        <!-- Input Section -->
+        <div class="glass-card card-mobile p-4 md:p-6 mb-4 md:mb-8 transition-all duration-300">
+            <h2 class="text-lg md:text-xl font-semibold text-white mb-4 cyber-font flex items-center">
+                <span class="mr-3 rotate-slow">🔍</span>
+                Analyze Content for Misinformation
+            </h2>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-cyan-300 mb-2">Content to Analyze</label>
+                    <textarea 
+                        id="contentInput" 
+                        placeholder="Paste news article, social media post, or any content you want to verify..."
+                        class="w-full h-32 md:h-40 p-3 md:p-4 bg-slate-800/50 border border-cyan-500/30 rounded-lg focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 resize-none text-sm md:text-base text-white placeholder-slate-400 backdrop-blur-sm transition-all duration-300"
+                    ></textarea>
+                </div>
+                <div class="flex flex-col gap-3">
+                    <input 
+                        type="url" 
+                        id="urlInput" 
+                        placeholder="Or enter URL (optional)"
+                        class="w-full p-3 bg-slate-800/50 border border-cyan-500/30 rounded-lg focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 text-sm md:text-base text-white placeholder-slate-400 backdrop-blur-sm transition-all duration-300"
+                    >
+                    <button 
+                        id="analyzeBtn"
+                        class="cyber-button text-white px-6 py-3 md:px-8 md:py-3 rounded-lg font-medium transition-all duration-300 flex items-center justify-center space-x-2 w-full md:w-auto hover:scale-105 glow-cyan"
+                    >
+                        <span class="text-lg">🛡️</span>
+                        <span class="text-sm md:text-base cyber-font">ANALYZE CONTENT</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading State -->
+        <div id="loadingState" class="hidden glass-card card-mobile p-6 md:p-8 mb-4 md:mb-8 text-center scanning">
+            <div class="text-4xl md:text-5xl mb-4 animate-pulse">🤖</div>
+            <h3 class="text-base md:text-lg font-semibold text-white mb-2 cyber-font">AI ANALYSIS IN PROGRESS</h3>
+            <p class="text-sm md:text-base text-cyan-300 typing-animation" id="loadingText">Analyzing content for misinformation patterns</p>
+            <div class="mt-6 bg-slate-700/50 rounded-full h-3 overflow-hidden">
+                <div id="progressBar" class="bg-gradient-to-r from-cyan-400 to-blue-500 h-3 rounded-full transition-all duration-300 glow-cyan" style="width: 0%"></div>
+            </div>
+            <div class="mt-4 flex justify-center space-x-2">
+                <div class="w-2 h-2 bg-cyan-400 rounded-full animate-bounce"></div>
+                <div class="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                <div class="w-2 h-2 bg-teal-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+            </div>
+        </div>
+
+        <!-- Analysis Results -->
+        <div id="analysisResults" class="hidden space-y-4 md:space-y-6">
+            
+            <!-- FAKE/REAL Result Badge -->
+            <div id="resultBadge" class="glass-card card-mobile p-6 md:p-8 text-center">
+                <div id="resultIcon" class="text-6xl md:text-8xl mb-4">🚨</div>
+                <div id="resultLabel" class="text-3xl md:text-5xl font-bold cyber-font mb-4 result-badge-fake rounded-lg py-4 px-6 inline-block">
+                    FAKE
+                </div>
+                <div class="mt-6">
+                    <div class="flex justify-between items-center mb-3">
+                        <span class="text-sm font-medium text-cyan-300">Confidence Level</span>
+                        <span id="confidenceScore" class="text-lg font-bold text-white cyber-font">76%</span>
+                    </div>
+                    <div class="confidence-meter">
+                        <div id="confidenceIndicator" class="confidence-indicator"></div>
+                    </div>
+                    <div class="flex justify-between text-xs text-slate-400 mt-2">
+                        <span>Low Confidence</span>
+                        <span>Medium</span>
+                        <span>High Confidence</span>
+                    </div>
+                </div>
+                <div id="resultExplanation" class="mt-6 p-4 bg-red-900/30 border border-red-500/30 rounded-lg">
+                    <p class="text-sm text-red-200">This content shows multiple signs of misinformation including sensational headlines, conspiracy language, and unsubstantiated medical claims.</p>
+                </div>
+            </div>
+            <!-- Translation Controls -->
+            <div class="glass-card card-mobile p-4 md:p-6">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div>
+                        <h3 class="text-base md:text-lg font-semibold text-white cyber-font">Detailed Analysis</h3>
+                        <p class="text-xs md:text-sm text-cyan-300">Comprehensive misinformation assessment</p>
+                    </div>
+                    <div class="translator-dropdown">
+                        <button id="translatorBtn" class="bg-cyan-900/50 hover:bg-cyan-800/50 text-cyan-300 border border-cyan-500/30 px-3 py-2 md:px-4 md:py-2 rounded-lg text-xs md:text-sm font-medium flex items-center space-x-2 transition-all duration-300 backdrop-blur-sm">
+                            <span>🌐</span>
+                            <span id="currentLanguage">English</span>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+                        <div id="translatorContent" class="translator-content bg-slate-800/95 backdrop-blur-md border-cyan-500/30">
+                            <div class="language-option hover:bg-cyan-900/30 text-white" data-lang="en" data-name="English">
+                                <div class="flex items-center space-x-2">
+                                    <span>🇺🇸</span>
+                                    <span class="font-medium">English</span>
+                                </div>
+                            </div>
+                            <div class="language-option hover:bg-cyan-900/30 text-white" data-lang="hi" data-name="हिंदी">
+                                <div class="flex items-center space-x-2">
+                                    <span>🇮🇳</span>
+                                    <span class="font-medium">हिंदी (Hindi)</span>
+                                </div>
+                            </div>
+                            <div class="language-option hover:bg-cyan-900/30 text-white" data-lang="bn" data-name="বাংলা">
+                                <div class="flex items-center space-x-2">
+                                    <span>🇧🇩</span>
+                                    <span class="font-medium">বাংলা (Bengali)</span>
+                                </div>
+                            </div>
+                            <div class="language-option hover:bg-cyan-900/30 text-white" data-lang="ta" data-name="தமிழ்">
+                                <div class="flex items-center space-x-2">
+                                    <span>🇮🇳</span>
+                                    <span class="font-medium">தமிழ் (Tamil)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Credibility Score -->
+            <div class="analysis-card glass-card card-mobile p-4 md:p-6 transition-all duration-300">
+                <h3 class="text-lg md:text-xl font-semibold text-white mb-4 flex items-center cyber-font">
+                    <span class="mr-3 text-2xl">📊</span>
+                    <span class="translatable gradient-text" data-key="credibility_title">Credibility Assessment</span>
+                </h3>
+                <div class="space-y-4">
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-xs md:text-sm font-medium text-cyan-300 translatable" data-key="overall_score">Overall Credibility Score</span>
+                            <span id="credibilityScore" class="text-base md:text-lg font-bold text-white cyber-font">--</span>
+                        </div>
+                        <div class="credibility-meter">
+                            <div id="credibilityIndicator" class="credibility-indicator"></div>
+                        </div>
+                        <div class="flex justify-between text-xs text-slate-400 mt-1">
+                            <span class="translatable" data-key="low_risk">Low Risk</span>
+                            <span class="translatable" data-key="medium_risk">Medium Risk</span>
+                            <span class="translatable" data-key="high_risk">High Risk</span>
+                        </div>
+                    </div>
+                    <div id="credibilityExplanation" class="bg-slate-800/50 rounded-lg p-3 md:p-4 border border-cyan-500/20">
+                        <p class="text-xs md:text-sm text-slate-300 translatable" data-key="credibility_explanation"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Red Flags -->
+            <div class="analysis-card glass-card card-mobile p-4 md:p-6 transition-all duration-300">
+                <h3 class="text-lg md:text-xl font-semibold text-white mb-4 flex items-center cyber-font">
+                    <span class="mr-3 text-2xl">🚩</span>
+                    <span class="translatable gradient-text" data-key="red_flags_title">Potential Red Flags</span>
+                </h3>
+                <div id="redFlags" class="space-y-3">
+                    <!-- Red flags will be populated here -->
+                </div>
+            </div>
+
+            <!-- Source Analysis -->
+            <div class="analysis-card glass-card card-mobile p-4 md:p-6 transition-all duration-300">
+                <h3 class="text-lg md:text-xl font-semibold text-white mb-4 flex items-center cyber-font">
+                    <span class="mr-3 text-2xl">🔍</span>
+                    <span class="translatable gradient-text" data-key="source_analysis_title">Source & Context Analysis</span>
+                </h3>
+                <div id="sourceAnalysis" class="space-y-4">
+                    <!-- Source analysis will be populated here -->
+                </div>
+            </div>
+
+            <!-- Educational Insights -->
+            <div class="analysis-card glass-card card-mobile p-4 md:p-6 transition-all duration-300">
+                <h3 class="text-lg md:text-xl font-semibold text-white mb-4 flex items-center cyber-font">
+                    <span class="mr-3 text-2xl">💡</span>
+                    <span class="translatable gradient-text" data-key="educational_title">Learn to Spot Misinformation</span>
+                </h3>
+                <div id="educationalInsights" class="space-y-4">
+                    <!-- Educational content will be populated here -->
+                </div>
+            </div>
+
+            <!-- Action Recommendations -->
+            <div class="analysis-card glass-card card-mobile p-4 md:p-6 transition-all duration-300">
+                <h3 class="text-lg md:text-xl font-semibold text-white mb-4 flex items-center cyber-font">
+                    <span class="mr-3 text-2xl">✅</span>
+                    <span class="translatable gradient-text" data-key="recommendations_title">Recommended Actions</span>
+                </h3>
+                <div id="recommendations" class="space-y-3">
+                    <!-- Recommendations will be populated here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Tips -->
+        <div class="glass-card card-mobile p-4 md:p-6 mt-4 md:mt-8 glow-cyan">
+            <h3 class="text-base md:text-lg font-semibold text-white mb-4 flex items-center cyber-font">
+                <span class="mr-3 text-xl">💡</span>
+                <span class="translatable gradient-text" data-key="quick_tips_title">Quick Verification Tips</span>
+            </h3>
+            <div class="grid gap-4 md:grid-cols-2">
+                <div class="space-y-3">
+                    <div class="flex items-start space-x-3 p-3 bg-slate-800/30 rounded-lg border border-cyan-500/20">
+                        <span class="text-green-400 mt-1 text-lg">✓</span>
+                        <div>
+                            <p class="font-medium text-white text-sm md:text-base translatable" data-key="tip1_title">Check Multiple Sources</p>
+                            <p class="text-xs md:text-sm text-cyan-300 translatable" data-key="tip1_desc">Verify information across different reliable news outlets</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start space-x-3 p-3 bg-slate-800/30 rounded-lg border border-cyan-500/20">
+                        <span class="text-green-400 mt-1 text-lg">✓</span>
+                        <div>
+                            <p class="font-medium text-white text-sm md:text-base translatable" data-key="tip2_title">Look for Author Credentials</p>
+                            <p class="text-xs md:text-sm text-cyan-300 translatable" data-key="tip2_desc">Check if the author is an expert in the subject matter</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="space-y-3">
+                    <div class="flex items-start space-x-3 p-3 bg-slate-800/30 rounded-lg border border-cyan-500/20">
+                        <span class="text-green-400 mt-1 text-lg">✓</span>
+                        <div>
+                            <p class="font-medium text-white text-sm md:text-base translatable" data-key="tip3_title">Verify Publication Date</p>
+                            <p class="text-xs md:text-sm text-cyan-300 translatable" data-key="tip3_desc">Ensure the information is current and relevant</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start space-x-3 p-3 bg-slate-800/30 rounded-lg border border-cyan-500/20">
+                        <span class="text-green-400 mt-1 text-lg">✓</span>
+                        <div>
+                            <p class="font-medium text-white text-sm md:text-base translatable" data-key="tip4_title">Check for Emotional Language</p>
+                            <p class="text-xs md:text-sm text-cyan-300 translatable" data-key="tip4_desc">Be wary of overly emotional or sensational headlines</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation (Mobile Only) -->
+    <div class="bottom-nav bg-slate-900/95 backdrop-blur-md border-t border-cyan-500/30">
+        <div class="flex justify-around items-center py-3">
+            <button class="flex flex-col items-center space-y-1 text-cyan-400">
+                <span class="text-lg pulse-shield">🛡️</span>
+                <span class="text-xs cyber-font">Analyze</span>
+            </button>
+            <button class="flex flex-col items-center space-y-1 text-slate-400 hover:text-cyan-300 transition-colors">
+                <span class="text-lg">📚</span>
+                <span class="text-xs">Learn</span>
+            </button>
+            <button class="flex flex-col items-center space-y-1 text-slate-400 hover:text-cyan-300 transition-colors">
+                <span class="text-lg">📊</span>
+                <span class="text-xs">History</span>
+            </button>
+            <button class="flex flex-col items-center space-y-1 text-slate-400 hover:text-cyan-300 transition-colors">
+                <span class="text-lg">⚙️</span>
+                <span class="text-xs">Settings</span>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        class MisinformationDetector {
+            constructor() {
+                console.log('Initializing MisinformationDetector...');
+                
+                this.analyzeBtn = document.getElementById('analyzeBtn');
+                this.contentInput = document.getElementById('contentInput');
+                this.urlInput = document.getElementById('urlInput');
+                this.loadingState = document.getElementById('loadingState');
+                this.analysisResults = document.getElementById('analysisResults');
+                this.currentLanguage = 'en';
+                this.translations = this.initializeTranslations();
+                
+                console.log('Elements found:', {
+                    analyzeBtn: !!this.analyzeBtn,
+                    contentInput: !!this.contentInput,
+                    urlInput: !!this.urlInput,
+                    loadingState: !!this.loadingState,
+                    analysisResults: !!this.analysisResults
+                });
+                
+                this.bindEvents();
+                this.loadSampleContent();
+                this.initializeTranslator();
+                
+                console.log('MisinformationDetector initialized successfully');
+            }
+
+            initializeTranslations() {
+                return {
+                    en: {
+                        credibility_title: "Credibility Assessment",
+                        overall_score: "Overall Credibility Score",
+                        low_risk: "Low Risk",
+                        medium_risk: "Medium Risk",
+                        high_risk: "High Risk",
+                        red_flags_title: "Potential Red Flags",
+                        source_analysis_title: "Source & Context Analysis",
+                        educational_title: "Learn to Spot Misinformation",
+                        recommendations_title: "Recommended Actions",
+                        quick_tips_title: "Quick Verification Tips",
+                        tip1_title: "Check Multiple Sources",
+                        tip1_desc: "Verify information across different reliable news outlets",
+                        tip2_title: "Look for Author Credentials",
+                        tip2_desc: "Check if the author is an expert in the subject matter",
+                        tip3_title: "Verify Publication Date",
+                        tip3_desc: "Ensure the information is current and relevant",
+                        tip4_title: "Check for Emotional Language",
+                        tip4_desc: "Be wary of overly emotional or sensational headlines",
+                        // Red flag translations
+                        sensational_headlines: "Sensational Headlines",
+                        conspiracy_language: "Conspiracy Language",
+                        medical_claims: "Unsubstantiated Medical Claims",
+                        urgency_manipulation: "Urgency Manipulation",
+                        unverifiable_sources: "Unverifiable Sources",
+                        call_to_action: "Call-to-Action Pressure",
+                        media_distrust: "Media Distrust Rhetoric",
+                        // Source analysis
+                        author_identified: "Author Identified",
+                        publication_date: "Publication Date",
+                        author_credentials: "Author Credentials",
+                        references_citations: "References/Citations",
+                        present: "Present",
+                        missing: "Missing",
+                        source_domain: "Source Domain",
+                        // Risk explanations
+                        high_risk_explanation: "HIGH RISK: This content shows multiple signs of misinformation. Exercise extreme caution and verify through reliable sources before believing or sharing.",
+                        medium_risk_explanation: "MEDIUM RISK: This content has some concerning elements. Additional verification is recommended before sharing.",
+                        low_risk_explanation: "LOW RISK: This content appears relatively credible, but always verify important claims through multiple sources.",
+                        // Red flag descriptions
+                        sensational_desc: "Headlines using words like \"SHOCKING\" or \"MIRACLE\" are designed to grab attention and bypass critical thinking.",
+                        conspiracy_desc: "Language suggesting widespread cover-ups often lacks evidence and appeals to distrust.",
+                        medical_desc: "Claims about curing serious diseases should always be verified through peer-reviewed medical research.",
+                        // Educational insights
+                        general_verification: "General Verification Tips",
+                        general_verification_desc: "Always cross-check important information with multiple reliable sources.",
+                        general_verification_tip: "Use fact-checking websites like Snopes, FactCheck.org, or PolitiFact for verification.",
+                        sensational_tip: "Look for neutral, factual headlines from reputable sources.",
+                        conspiracy_tip: "Look for concrete evidence and multiple independent sources confirming claims.",
+                        medical_tip: "Consult healthcare professionals and check medical journals for legitimate treatments.",
+                        // Recommendations
+                        do_not_share: "Do not share this content",
+                        fact_check: "Fact-check with reputable sources",
+                        report_misinfo: "Report as potential misinformation",
+                        educate_others: "Educate others about these red flags",
+                        verify_additional: "Verify with additional sources",
+                        check_credentials: "Check author credentials",
+                        peer_reviewed: "Look for peer-reviewed evidence",
+                        appears_credible: "Content appears relatively credible",
+                        verify_claims: "Still verify important claims",
+                        check_date: "Check publication date for relevance",
+                        high_priority: "HIGH PRIORITY",
+                        medium_priority: "MEDIUM PRIORITY",
+                        low_priority: "LOW PRIORITY",
+                        // Misc
+                        found_instances: "Found",
+                        instance: "instance",
+                        instances: "instances",
+                        examples: "Examples",
+                        no_red_flags: "No major red flags detected in this content."
+                    },
+                    hi: {
+                        credibility_title: "विश्वसनीयता मूल्यांकन",
+                        overall_score: "समग्र विश्वसनीयता स्कोर",
+                        low_risk: "कम जोखिम",
+                        medium_risk: "मध्यम जोखिम",
+                        high_risk: "उच्च जोखिम",
+                        red_flags_title: "संभावित चेतावनी संकेत",
+                        source_analysis_title: "स्रोत और संदर्भ विश्लेषण",
+                        educational_title: "गलत सूचना पहचानना सीखें",
+                        recommendations_title: "सुझाई गई कार्रवाइयां",
+                        quick_tips_title: "त्वरित सत्यापन सुझाव",
+                        tip1_title: "कई स्रोतों की जांच करें",
+                        tip1_desc: "विभिन्न विश्वसनीय समाचार आउटलेट्स में जानकारी सत्यापित करें",
+                        tip2_title: "लेखक की योग्यता देखें",
+                        tip2_desc: "जांचें कि क्या लेखक विषय का विशेषज्ञ है",
+                        tip3_title: "प्रकाशन तिथि सत्यापित करें",
+                        tip3_desc: "सुनिश्चित करें कि जानकारी वर्तमान और प्रासंगिक है",
+                        tip4_title: "भावनात्मक भाषा की जांच करें",
+                        tip4_desc: "अत्यधिक भावनात्मक या सनसनीखेज शीर्षकों से सावधान रहें",
+                        // Red flag translations
+                        sensational_headlines: "सनसनीखेज शीर्षक",
+                        conspiracy_language: "षड्यंत्र की भाषा",
+                        medical_claims: "अप्रमाणित चिकित्सा दावे",
+                        urgency_manipulation: "तात्कालिकता का हेरफेर",
+                        unverifiable_sources: "अप्रमाणित स्रोत",
+                        call_to_action: "कार्य-आह्वान का दबाव",
+                        media_distrust: "मीडिया अविश्वास की बयानबाजी",
+                        // Source analysis
+                        author_identified: "लेखक की पहचान",
+                        publication_date: "प्रकाशन तिथि",
+                        author_credentials: "लेखक की योग्यता",
+                        references_citations: "संदर्भ/उद्धरण",
+                        present: "मौजूद",
+                        missing: "गुम",
+                        source_domain: "स्रोत डोमेन",
+                        // Risk explanations
+                        high_risk_explanation: "उच्च जोखिम: यह सामग्री गलत सूचना के कई संकेत दिखाती है। विश्वास करने या साझा करने से पहले विश्वसनीय स्रोतों के माध्यम से अत्यधिक सावधानी बरतें और सत्यापित करें।",
+                        medium_risk_explanation: "मध्यम जोखिम: इस सामग्री में कुछ चिंताजनक तत्व हैं। साझा करने से पहले अतिरिक्त सत्यापन की सिफारिश की जाती है।",
+                        low_risk_explanation: "कम जोखिम: यह सामग्री अपेक्षाकृत विश्वसनीय प्रतीत होती है, लेकिन हमेशा कई स्रोतों के माध्यम से महत्वपूर्ण दावों को सत्यापित करें।",
+                        // Red flag descriptions
+                        sensational_desc: "\"चौंकाने वाला\" या \"चमत्कार\" जैसे शब्दों का उपयोग करने वाले शीर्षक ध्यान आकर्षित करने और आलोचनात्मक सोच को दरकिनार करने के लिए डिज़ाइन किए गए हैं।",
+                        conspiracy_desc: "व्यापक कवर-अप का सुझाव देने वाली भाषा में अक्सर सबूत की कमी होती है और यह अविश्वास की अपील करती है।",
+                        medical_desc: "गंभीर बीमारियों को ठीक करने के दावों को हमेशा सहकर्मी-समीक्षित चिकित्सा अनुसंधान के माध्यम से सत्यापित किया जाना चाहिए।",
+                        // Educational insights
+                        general_verification: "सामान्य सत्यापन सुझाव",
+                        general_verification_desc: "हमेशा कई विश्वसनीय स्रोतों के साथ महत्वपूर्ण जानकारी की जांच करें।",
+                        general_verification_tip: "सत्यापन के लिए Snopes, FactCheck.org, या PolitiFact जैसी तथ्य-जांच वेबसाइटों का उपयोग करें।",
+                        sensational_tip: "प्रतिष्ठित स्रोतों से तटस्थ, तथ्यात्मक शीर्षक देखें।",
+                        conspiracy_tip: "दावों की पुष्टि करने वाले ठोस सबूत और कई स्वतंत्र स्रोत देखें।",
+                        medical_tip: "स्वास्थ्य पेशेवरों से सलाह लें और वैध उपचार के लिए चिकित्सा पत्रिकाओं की जांच करें।",
+                        // Recommendations
+                        do_not_share: "इस सामग्री को साझा न करें",
+                        fact_check: "प्रतिष्ठित स्रोतों के साथ तथ्य-जांच करें",
+                        report_misinfo: "संभावित गलत सूचना के रूप में रिपोर्ट करें",
+                        educate_others: "दूसरों को इन चेतावनी संकेतों के बारे में शिक्षित करें",
+                        verify_additional: "अतिरिक्त स्रोतों के साथ सत्यापित करें",
+                        check_credentials: "लेखक की योग्यता जांचें",
+                        peer_reviewed: "सहकर्मी-समीक्षित साक्ष्य देखें",
+                        appears_credible: "सामग्री अपेक्षाकृत विश्वसनीय प्रतीत होती है",
+                        verify_claims: "फिर भी महत्वपूर्ण दावों को सत्यापित करें",
+                        check_date: "प्रासंगिकता के लिए प्रकाशन तिथि जांचें",
+                        high_priority: "उच्च प्राथमिकता",
+                        medium_priority: "मध्यम प्राथमिकता",
+                        low_priority: "कम प्राथमिकता",
+                        // Misc
+                        found_instances: "मिले",
+                        instance: "उदाहरण",
+                        instances: "उदाहरण",
+                        examples: "उदाहरण",
+                        no_red_flags: "इस सामग्री में कोई प्रमुख चेतावनी संकेत नहीं मिले।"
+                    },
+                    bn: {
+                        credibility_title: "বিশ্বাসযোগ্যতা মূল্যায়ন",
+                        overall_score: "সামগ্রিক বিশ্বাসযোগ্যতা স্কোর",
+                        low_risk: "কম ঝুঁকি",
+                        medium_risk: "মাঝারি ঝুঁকি",
+                        high_risk: "উচ্চ ঝুঁকি",
+                        red_flags_title: "সম্ভাব্য সতর্কতা সংকেত",
+                        source_analysis_title: "উৎস ও প্রসঙ্গ বিশ্লেষণ",
+                        educational_title: "ভুল তথ্য চিহ্নিত করতে শিখুন",
+                        recommendations_title: "প্রস্তাবিত পদক্ষেপ",
+                        quick_tips_title: "দ্রুত যাচাইকরণ টিপস",
+                        tip1_title: "একাধিক উৎস পরীক্ষা করুন",
+                        tip1_desc: "বিভিন্ন নির্ভরযোগ্য সংবাদ আউটলেটে তথ্য যাচাই করুন",
+                        tip2_title: "লেখকের যোগ্যতা দেখুন",
+                        tip2_desc: "লেখক বিষয়ের বিশেষজ্ঞ কিনা পরীক্ষা করুন",
+                        tip3_title: "প্রকাশনার তারিখ যাচাই করুন",
+                        tip3_desc: "তথ্য বর্তমান এবং প্রাসঙ্গিক কিনা নিশ্চিত করুন",
+                        tip4_title: "আবেগপ্রবণ ভাষা পরীক্ষা করুন",
+                        tip4_desc: "অতিরিক্ত আবেগপ্রবণ বা চাঞ্চল্যকর শিরোনাম থেকে সাবধান থাকুন",
+                        // Red flag translations
+                        sensational_headlines: "চাঞ্চল্যকর শিরোনাম",
+                        conspiracy_language: "ষড়যন্ত্রের ভাষা",
+                        medical_claims: "অপ্রমাণিত চিকিৎসা দাবি",
+                        urgency_manipulation: "জরুরিত্বের কারসাজি",
+                        unverifiable_sources: "অযাচাইযোগ্য উৎস",
+                        call_to_action: "কর্ম-আহ্বানের চাপ",
+                        media_distrust: "মিডিয়া অবিশ্বাসের বক্তব্য",
+                        // Source analysis
+                        author_identified: "লেখক চিহ্নিত",
+                        publication_date: "প্রকাশনার তারিখ",
+                        author_credentials: "লেখকের যোগ্যতা",
+                        references_citations: "তথ্যসূত্র/উদ্ধৃতি",
+                        present: "উপস্থিত",
+                        missing: "অনুপস্থিত",
+                        source_domain: "উৎস ডোমেইন",
+                        // Risk explanations
+                        high_risk_explanation: "উচ্চ ঝুঁকি: এই বিষয়বস্তু ভুল তথ্যের একাধিক লক্ষণ দেখায়। বিশ্বাস করার বা শেয়ার করার আগে নির্ভরযোগ্য উৎসের মাধ্যমে অত্যন্ত সতর্কতা অবলম্বন করুন এবং যাচাই করুন।",
+                        medium_risk_explanation: "মাঝারি ঝুঁকি: এই বিষয়বস্তুতে কিছু উদ্বেগজনক উপাদান রয়েছে। শেয়ার করার আগে অতিরিক্ত যাচাইকরণের সুপারিশ করা হয়।",
+                        low_risk_explanation: "কম ঝুঁকি: এই বিষয়বস্তু তুলনামূলকভাবে বিশ্বাসযোগ্য বলে মনে হয়, তবে সর্বদা একাধিক উৎসের মাধ্যমে গুরুত্বপূর্ণ দাবি যাচাই করুন।",
+                        // Red flag descriptions
+                        sensational_desc: "\"চমকপ্রদ\" বা \"অলৌকিক\" এর মতো শব্দ ব্যবহারকারী শিরোনামগুলি মনোযোগ আকর্ষণ করতে এবং সমালোচনামূলক চিন্তাভাবনা এড়িয়ে যাওয়ার জন্য ডিজাইন করা হয়েছে।",
+                        conspiracy_desc: "ব্যাপক গোপনীয়তার পরামর্শ দেওয়া ভাষায় প্রায়শই প্রমাণের অভাব থাকে এবং অবিশ্বাসের আবেদন করে।",
+                        medical_desc: "গুরুতর রোগ নিরাময়ের দাবিগুলি সর্বদা সহকর্মী-পর্যালোচিত চিকিৎসা গবেষণার মাধ্যমে যাচাই করা উচিত।",
+                        // Educational insights
+                        general_verification: "সাধারণ যাচাইকরণ টিপস",
+                        general_verification_desc: "সর্বদা একাধিক নির্ভরযোগ্য উৎসের সাথে গুরুত্বপূর্ণ তথ্য ক্রস-চেক করুন।",
+                        general_verification_tip: "যাচাইকরণের জন্য Snopes, FactCheck.org, বা PolitiFact এর মতো তথ্য-যাচাই ওয়েবসাইট ব্যবহার করুন।",
+                        sensational_tip: "নামকরা উৎস থেকে নিরপেক্ষ, তথ্যভিত্তিক শিরোনাম খুঁজুন।",
+                        conspiracy_tip: "দাবি নিশ্চিত করে এমন কংক্রিট প্রমাণ এবং একাধিক স্বাধীন উৎস খুঁজুন।",
+                        medical_tip: "স্বাস্থ্যসেবা পেশাদারদের সাথে পরামর্শ করুন এবং বৈধ চিকিৎসার জন্য চিকিৎসা জার্নাল পরীক্ষা করুন।",
+                        // Recommendations
+                        do_not_share: "এই বিষয়বস্তু শেয়ার করবেন না",
+                        fact_check: "নামকরা উৎসের সাথে তথ্য-যাচাই করুন",
+                        report_misinfo: "সম্ভাব্য ভুল তথ্য হিসেবে রিপোর্ট করুন",
+                        educate_others: "অন্যদের এই সতর্কতা সংকেত সম্পর্কে শিক্ষিত করুন",
+                        verify_additional: "অতিরিক্ত উৎসের সাথে যাচাই করুন",
+                        check_credentials: "লেখকের যোগ্যতা পরীক্ষা করুন",
+                        peer_reviewed: "সহকর্মী-পর্যালোচিত প্রমাণ খুঁজুন",
+                        appears_credible: "বিষয়বস্তু তুলনামূলকভাবে বিশ্বাসযোগ্য বলে মনে হয়",
+                        verify_claims: "এখনও গুরুত্বপূর্ণ দাবি যাচাই করুন",
+                        check_date: "প্রাসঙ্গিকতার জন্য প্রকাশনার তারিখ পরীক্ষা করুন",
+                        high_priority: "উচ্চ অগ্রাধিকার",
+                        medium_priority: "মাঝারি অগ্রাধিকার",
+                        low_priority: "কম অগ্রাধিকার",
+                        // Misc
+                        found_instances: "পাওয়া গেছে",
+                        instance: "উদাহরণ",
+                        instances: "উদাহরণ",
+                        examples: "উদাহরণ",
+                        no_red_flags: "এই বিষয়বস্তুতে কোনো প্রধান সতর্কতা সংকেত পাওয়া যায়নি।"
+                    },
+                    ta: {
+                        credibility_title: "நம்பகத்தன்மை மதிப்பீடு",
+                        overall_score: "ஒட்டுமொத்த நம்பகத்தன்மை மதிப்பெண்",
+                        low_risk: "குறைந்த ஆபத்து",
+                        medium_risk: "நடுத்தர ஆபத்து",
+                        high_risk: "அதிக ஆபத்து",
+                        red_flags_title: "சாத்தியமான எச்சரிக்கை அறிகுறிகள்",
+                        source_analysis_title: "மூலம் மற்றும் சூழல் பகுப்பாய்வு",
+                        educational_title: "தவறான தகவலை அடையாளம் காண கற்றுக்கொள்ளுங்கள்",
+                        recommendations_title: "பரிந்துரைக்கப்பட்ட நடவடிக்கைகள்",
+                        quick_tips_title: "விரைவான சரிபார்ப்பு குறிப்புகள்",
+                        tip1_title: "பல ஆதாரங்களை சரிபார்க்கவும்",
+                        tip1_desc: "வெவ்வேறு நம்பகமான செய்தி ஆதாரங்களில் தகவலை சரிபார்க்கவும்",
+                        tip2_title: "ஆசிரியரின் தகுதிகளைப் பார்க்கவும்",
+                        tip2_desc: "ஆசிரியர் விषயத்தில் நிபுணரா என்பதை சரிபார்க்கவும்",
+                        tip3_title: "வெளியீட்டு தேதியை சரிபார்க்கவும்",
+                        tip3_desc: "தகவல் தற்போதைய மற்றும் பொருத்தமானது என்பதை உறுதிப்படுத்தவும்",
+                        tip4_title: "உணர்ச்சிவசப்பட்ட மொழியை சரிபார்க்கவும்",
+                        tip4_desc: "அதிக உணர்ச்சிவசப்பட்ட அல்லது பரபரப்பான தலைப்புகளில் எச்சரிக்கையாக இருங்கள்",
+                        // Red flag translations
+                        sensational_headlines: "பரபரப்பான தலைப்புகள்",
+                        conspiracy_language: "சதி மொழி",
+                        medical_claims: "நிரூபிக்கப்படாத மருத்துவ கூற்றுகள்",
+                        urgency_manipulation: "அவசர கையாளுதல்",
+                        unverifiable_sources: "சரிபார்க்க முடியாத ஆதாரங்கள்",
+                        call_to_action: "செயல் அழைப்பு அழுத்தம்",
+                        media_distrust: "ஊடக அவநம்பிக்கை வார்த்தைகள்",
+                        // Source analysis
+                        author_identified: "ஆசிரியர் அடையாளம் காணப்பட்டார்",
+                        publication_date: "வெளியீட்டு தேதி",
+                        author_credentials: "ஆசிரியரின் தகுதிகள்",
+                        references_citations: "குறிப்புகள்/மேற்கோள்கள்",
+                        present: "உள்ளது",
+                        missing: "இல்லை",
+                        source_domain: "மூல டொமைன்",
+                        // Risk explanations
+                        high_risk_explanation: "அதிக ஆபத்து: இந்த உள்ளடக்கம் தவறான தகவலின் பல அறிகுறிகளைக் காட்டுகிறது। நம்புவதற்கு அல்லது பகிர்வதற்கு முன் நம்பகமான ஆதாரங்கள் மூலம் தீவிர எச்சரிக்கையுடன் சரிபார்க்கவும்.",
+                        medium_risk_explanation: "நடுத்தர ஆபத்து: இந்த உள்ளடக்கத்தில் சில கவலைக்குரிய கூறுகள் உள்ளன. பகிர்வதற்கு முன் கூடுதல் சரிபார்ப்பு பரிந்துரைக்கப்படுகிறது.",
+                        low_risk_explanation: "குறைந்த ஆபத்து: இந்த உள்ளடக்கம் ஒப்பீட்டளவில் நம்பகமானதாகத் தோன்றுகிறது, ஆனால் எப்போதும் பல ஆதாரங்கள் மூலம் முக்கியமான கூற்றுகளை சரிபார்க்கவும்.",
+                        // Red flag descriptions
+                        sensational_desc: "\"அதிர்ச்சியூட்டும்\" அல்லது \"அதிசயம்\" போன்ற வார்த்தைகளைப் பயன்படுத்தும் தலைப்புகள் கவனத்தை ஈர்க்கவும் விமர்சன சிந்தனையைத் தவிர்க்கவும் வடிவமைக்கப்பட்டுள்ளன.",
+                        conspiracy_desc: "பரவலான மறைப்பை பரிந்துரைக்கும் மொழியில் பெரும்பாலும் ஆதாரம் இல்லை மற்றும் அவநம்பிக்கையை வேண்டுகிறது.",
+                        medical_desc: "கடுமையான நோய்களைக் குணப்படுத்துவதற்கான கூற்றுகள் எப்போதும் சக மதிப்பாய்வு செய்யப்பட்ட மருத்துவ ஆராய்ச்சி மூலம் சரிபார்க்கப்பட வேண்டும்.",
+                        // Educational insights
+                        general_verification: "பொதுவான சரிபார்ப்பு குறிப்புகள்",
+                        general_verification_desc: "எப்போதும் பல நம்பகமான ஆதாரங்களுடன் முக்கியமான தகவல்களை குறுக்கு சரிபார்க்கவும்.",
+                        general_verification_tip: "சரிபார்ப்புக்காக Snopes, FactCheck.org, அல்லது PolitiFact போன்ற உண்மை சரிபார்ப்பு வலைத்தளங்களைப் பயன்படுத்தவும்.",
+                        sensational_tip: "புகழ்பெற்ற ஆதாரங்களிலிருந்து நடுநிலை, உண்மை சார்ந்த தலைப்புகளைத் தேடுங்கள்.",
+                        conspiracy_tip: "கூற்றுகளை உறுதிப்படுத்தும் உறுதியான ஆதாரங்கள் மற்றும் பல சுயாதீன ஆதாரங்களைத் தேடுங்கள்.",
+                        medical_tip: "சுகாதார நிபுணர்களுடன் ஆலோசித்து, சட்டபூர்வமான சிகிச்சைகளுக்கு மருத்துவ இதழ்களைச் சரிபார்க்கவும்.",
+                        // Recommendations
+                        do_not_share: "இந்த உள்ளடக்கத்தைப் பகிர வேண்டாம்",
+                        fact_check: "புகழ்பெற்ற ஆதாரங்களுடன் உண்மை சரிபார்க்கவும்",
+                        report_misinfo: "சாத்தியமான தவறான தகவலாக புகாரளிக்கவும்",
+                        educate_others: "மற்றவர்களுக்கு இந்த எச்சரிக்கை அறிகுறிகளைப் பற்றி கற்பிக்கவும்",
+                        verify_additional: "கூடுதல் ஆதாரங்களுடன் சரிபார்க்கவும்",
+                        check_credentials: "ஆசிரியரின் தகுதிகளைச் சரிபார்க்கவும்",
+                        peer_reviewed: "சக மதிப்பாய்வு செய்யப்பட்ட ஆதாரங்களைத் தேடுங்கள்",
+                        appears_credible: "உள்ளடக்கம் ஒப்பீட்டளவில் நம்பகமானதாகத் தோன்றுகிறது",
+                        verify_claims: "இன்னும் முக்கியமான கூற்றுகளை சரிபார்க்கவும்",
+                        check_date: "பொருத்தத்திற்காக வெளியீட்டு தேதியைச் சரிபார்க்கவும்",
+                        high_priority: "உயர் முன்னுரிமை",
+                        medium_priority: "நடுத்தர முன்னுரிமை",
+                        low_priority: "குறைந்த முன்னுரிமை",
+                        // Misc
+                        found_instances: "கண்டறியப்பட்டது",
+                        instance: "உதாரணம்",
+                        instances: "உதாரணங்கள்",
+                        examples: "உதாரணங்கள்",
+                        no_red_flags: "இந்த உள்ளடக்கத்தில் முக்கிய எச்சரிக்கை அறிகுறிகள் எதுவும் கண்டறியப்படவில்லை."
+                    }
+                };
+            }
+
+            initializeTranslator() {
+                const translatorBtn = document.getElementById('translatorBtn');
+                const translatorContent = document.getElementById('translatorContent');
+                const languageOptions = document.querySelectorAll('.language-option');
+
+                // Toggle dropdown
+                translatorBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    translatorContent.classList.toggle('show');
+                });
+
+                // Close dropdown when clicking outside
+                document.addEventListener('click', () => {
+                    translatorContent.classList.remove('show');
+                });
+
+                // Handle language selection
+                languageOptions.forEach(option => {
+                    option.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const lang = option.dataset.lang;
+                        const name = option.dataset.name;
+                        this.translateContent(lang, name);
+                        translatorContent.classList.remove('show');
+                    });
+                });
+            }
+
+            async translateContent(targetLang, languageName) {
+                if (targetLang === this.currentLanguage) return;
+
+                const currentLanguageEl = document.getElementById('currentLanguage');
+                const translatorBtn = document.getElementById('translatorBtn');
+                
+                // Show loading state
+                translatorBtn.classList.add('translating');
+                currentLanguageEl.innerHTML = '<span class="translate-indicator">⟳</span> Translating...';
+
+                // Simulate translation delay
+                await new Promise(resolve => setTimeout(resolve, 1000));
+
+                // Update current language
+                this.currentLanguage = targetLang;
+                currentLanguageEl.textContent = languageName;
+
+                // Translate all elements with translatable class
+                const translatableElements = document.querySelectorAll('.translatable');
+                translatableElements.forEach(element => {
+                    const key = element.dataset.key;
+                    if (this.translations[targetLang] && this.translations[targetLang][key]) {
+                        element.textContent = this.translations[targetLang][key];
+                    }
+                });
+
+                // Translate dynamic content if analysis results exist
+                if (!document.getElementById('analysisResults').classList.contains('hidden')) {
+                    this.translateAnalysisResults(targetLang);
+                }
+
+                // Remove loading state
+                translatorBtn.classList.remove('translating');
+            }
+
+            translateAnalysisResults(targetLang) {
+                // Translate credibility explanation
+                const credibilityExplanation = document.querySelector('#credibilityExplanation .translatable');
+                if (credibilityExplanation && this.lastAnalysis) {
+                    const score = this.lastAnalysis.credibilityScore;
+                    let explanationKey = '';
+                    if (score < 30) explanationKey = 'high_risk_explanation';
+                    else if (score < 60) explanationKey = 'medium_risk_explanation';
+                    else explanationKey = 'low_risk_explanation';
+                    
+                    if (this.translations[targetLang][explanationKey]) {
+                        credibilityExplanation.textContent = this.translations[targetLang][explanationKey];
+                    }
+                }
+
+                // Translate red flags
+                this.translateRedFlags(targetLang);
+                
+                // Translate source analysis
+                this.translateSourceAnalysis(targetLang);
+                
+                // Translate educational insights
+                this.translateEducationalInsights(targetLang);
+                
+                // Translate recommendations
+                this.translateRecommendations(targetLang);
+            }
+
+            translateRedFlags(targetLang) {
+                if (!this.lastAnalysis || !this.lastAnalysis.redFlags) return;
+                
+                const container = document.getElementById('redFlags');
+                if (this.lastAnalysis.redFlags.length === 0) {
+                    const noFlagsText = this.translations[targetLang]['no_red_flags'] || this.translations['en']['no_red_flags'];
+                    container.innerHTML = `<div class="text-green-600 bg-green-50 p-4 rounded-lg">✅ ${noFlagsText}</div>`;
+                    return;
+                }
+
+                const flagTranslations = {
+                    'Sensational Headlines': 'sensational_headlines',
+                    'Conspiracy Language': 'conspiracy_language',
+                    'Unsubstantiated Medical Claims': 'medical_claims',
+                    'Urgency Manipulation': 'urgency_manipulation',
+                    'Unverifiable Sources': 'unverifiable_sources',
+                    'Call-to-Action Pressure': 'call_to_action',
+                    'Media Distrust Rhetoric': 'media_distrust'
+                };
+
+                container.innerHTML = this.lastAnalysis.redFlags.map(flag => {
+                    const severityColors = {
+                        critical: 'bg-red-100 text-red-800 border-red-200',
+                        high: 'bg-orange-100 text-orange-800 border-orange-200',
+                        medium: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+                        low: 'bg-blue-100 text-blue-800 border-blue-200'
+                    };
+
+                    const translatedFlag = this.translations[targetLang][flagTranslations[flag.flag]] || flag.flag;
+                    const foundText = this.translations[targetLang]['found_instances'] || 'Found';
+                    const instanceText = flag.count > 1 ? 
+                        (this.translations[targetLang]['instances'] || 'instances') : 
+                        (this.translations[targetLang]['instance'] || 'instance');
+                    const examplesText = this.translations[targetLang]['examples'] || 'Examples';
+
+                    return `
+                        <div class="border-l-4 ${severityColors[flag.severity]} p-4 rounded-r-lg">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h4 class="font-semibold">${translatedFlag}</h4>
+                                    <p class="text-sm mt-1">${foundText} ${flag.count} ${instanceText}</p>
+                                    ${flag.examples.length > 0 ? `<p class="text-xs mt-2 opacity-75">${examplesText}: "${flag.examples.join('", "')}"</p>` : ''}
+                                </div>
+                                <span class="text-xs font-medium px-2 py-1 rounded-full bg-white bg-opacity-50">
+                                    ${flag.severity.toUpperCase()}
+                                </span>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            translateSourceAnalysis(targetLang) {
+                if (!this.lastAnalysis || !this.lastAnalysis.sourceAnalysis) return;
+                
+                const container = document.getElementById('sourceAnalysis');
+                const sourceAnalysis = this.lastAnalysis.sourceAnalysis;
+                
+                const checks = [
+                    { 
+                        labelKey: 'author_identified', 
+                        value: sourceAnalysis.hasAuthor, 
+                        icon: '👤' 
+                    },
+                    { 
+                        labelKey: 'publication_date', 
+                        value: sourceAnalysis.hasDate, 
+                        icon: '📅' 
+                    },
+                    { 
+                        labelKey: 'author_credentials', 
+                        value: sourceAnalysis.hasCredentials, 
+                        icon: '🎓' 
+                    },
+                    { 
+                        labelKey: 'references_citations', 
+                        value: sourceAnalysis.hasReferences, 
+                        icon: '📚' 
+                    }
+                ];
+
+                const presentText = this.translations[targetLang]['present'] || 'Present';
+                const missingText = this.translations[targetLang]['missing'] || 'Missing';
+                const sourceDomainText = this.translations[targetLang]['source_domain'] || 'Source Domain';
+
+                container.innerHTML = `
+                    <div class="grid md:grid-cols-2 gap-4">
+                        ${checks.map(check => {
+                            const label = this.translations[targetLang][check.labelKey] || check.labelKey;
+                            return `
+                                <div class="flex items-center space-x-3 p-3 rounded-lg ${check.value ? 'bg-green-50' : 'bg-red-50'}">
+                                    <span class="text-xl">${check.icon}</span>
+                                    <div>
+                                        <p class="font-medium ${check.value ? 'text-green-800' : 'text-red-800'}">${label}</p>
+                                        <p class="text-sm ${check.value ? 'text-green-600' : 'text-red-600'}">
+                                            ${check.value ? '✅ ' + presentText : '❌ ' + missingText}
+                                        </p>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                    ${sourceAnalysis.domain !== 'Not provided' ? `
+                        <div class="mt-4 p-3 bg-gray-50 rounded-lg">
+                            <p class="text-sm"><strong>${sourceDomainText}:</strong> ${sourceAnalysis.domain}</p>
+                        </div>
+                    ` : ''}
+                `;
+            }
+
+            translateEducationalInsights(targetLang) {
+                if (!this.lastAnalysis || !this.lastAnalysis.educationalInsights) return;
+                
+                const container = document.getElementById('educationalInsights');
+                let insights = this.lastAnalysis.educationalInsights;
+                
+                if (insights.length === 0) {
+                    insights = [{
+                        titleKey: 'general_verification',
+                        descKey: 'general_verification_desc',
+                        tipKey: 'general_verification_tip'
+                    }];
+                }
+
+                container.innerHTML = insights.map(insight => {
+                    const title = insight.titleKey ? 
+                        (this.translations[targetLang][insight.titleKey] || insight.title) : 
+                        insight.title;
+                    const description = insight.descKey ? 
+                        (this.translations[targetLang][insight.descKey] || insight.description) : 
+                        insight.description;
+                    const tip = insight.tipKey ? 
+                        (this.translations[targetLang][insight.tipKey] || insight.tip) : 
+                        insight.tip;
+
+                    return `
+                        <div class="border border-blue-200 rounded-lg p-4 bg-blue-50">
+                            <h4 class="font-semibold text-blue-800 mb-2">${title}</h4>
+                            <p class="text-blue-700 text-sm mb-2">${description}</p>
+                            <div class="bg-blue-100 rounded p-3 mt-3">
+                                <p class="text-xs text-blue-800"><strong>💡 Tip:</strong> ${tip}</p>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            translateRecommendations(targetLang) {
+                if (!this.lastAnalysis || !this.lastAnalysis.recommendations) return;
+                
+                const container = document.getElementById('recommendations');
+                
+                const priorityColors = {
+                    high: 'bg-red-50 border-red-200 text-red-800',
+                    medium: 'bg-yellow-50 border-yellow-200 text-yellow-800',
+                    low: 'bg-green-50 border-green-200 text-green-800'
+                };
+
+                const actionTranslations = {
+                    'Do not share this content': 'do_not_share',
+                    'Fact-check with reputable sources': 'fact_check',
+                    'Report as potential misinformation': 'report_misinfo',
+                    'Educate others about these red flags': 'educate_others',
+                    'Verify with additional sources': 'verify_additional',
+                    'Check author credentials': 'check_credentials',
+                    'Look for peer-reviewed evidence': 'peer_reviewed',
+                    'Content appears relatively credible': 'appears_credible',
+                    'Still verify important claims': 'verify_claims',
+                    'Check publication date for relevance': 'check_date'
+                };
+
+                const priorityTranslations = {
+                    'high': 'high_priority',
+                    'medium': 'medium_priority',
+                    'low': 'low_priority'
+                };
+
+                container.innerHTML = this.lastAnalysis.recommendations.map(rec => {
+                    const translatedAction = this.translations[targetLang][actionTranslations[rec.action]] || rec.action;
+                    const translatedPriority = this.translations[targetLang][priorityTranslations[rec.priority]] || rec.priority.toUpperCase() + ' PRIORITY';
+
+                    return `
+                        <div class="flex items-center space-x-3 p-4 border rounded-lg ${priorityColors[rec.priority]}">
+                            <span class="text-2xl">${rec.icon}</span>
+                            <div class="flex-1">
+                                <p class="font-medium">${translatedAction}</p>
+                                <p class="text-xs opacity-75 mt-1">${translatedPriority}</p>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+
+
+            bindEvents() {
+                // Ensure button exists before binding
+                if (this.analyzeBtn) {
+                    this.analyzeBtn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        console.log('Analyze button clicked');
+                        this.analyzeContent();
+                    });
+                }
+                
+                // Allow Enter key to trigger analysis
+                if (this.contentInput) {
+                    this.contentInput.addEventListener('keydown', (e) => {
+                        if (e.ctrlKey && e.key === 'Enter') {
+                            this.analyzeContent();
+                        }
+                    });
+                }
+            }
+
+            loadSampleContent() {
+                const sampleContent = `BREAKING: Scientists Discover Miracle Cure That Big Pharma Doesn't Want You to Know!
+
+A revolutionary new treatment has been discovered that can cure cancer, diabetes, and heart disease in just 7 days! This amazing breakthrough uses only natural ingredients that you can find in your kitchen.
+
+Dr. Sarah Johnson, a leading researcher (who wishes to remain anonymous for safety reasons), revealed this shocking information exclusively to our team. "The pharmaceutical industry has been suppressing this cure for decades because it would cost them billions in profits," she explained.
+
+The treatment involves drinking a special mixture of lemon juice, baking soda, and honey three times a day. Thousands of people have already been cured using this method, but mainstream media refuses to report on it.
+
+Don't let Big Pharma control your health! Share this article with everyone you know before it gets taken down. The government and medical establishment are trying to silence this information.
+
+Click here to learn the exact recipe and save your life today! (Limited time offer - this information may be removed soon)`;
+
+                this.contentInput.value = sampleContent;
+            }
+
+            async analyzeContent() {
+                const content = this.contentInput.value.trim();
+                const url = this.urlInput.value.trim();
+
+                if (!content && !url) {
+                    alert('Please enter some content or a URL to analyze.');
+                    return;
+                }
+
+                try {
+                    this.showLoading();
+                    
+                    // Simulate AI analysis with realistic timing
+                    await this.simulateAnalysis();
+                    
+                    // Analyze the content
+                    const analysis = this.performAnalysis(content, url);
+                    
+                    this.showResults(analysis);
+                } catch (error) {
+                    console.error('Analysis error:', error);
+                    this.loadingState.classList.add('hidden');
+                    alert('An error occurred during analysis. Please try again.');
+                }
+            }
+
+            showLoading() {
+                this.analysisResults.classList.add('hidden');
+                this.loadingState.classList.remove('hidden');
+                
+                const loadingTexts = [
+                    'Analyzing content for misinformation patterns',
+                    'Checking source credibility',
+                    'Identifying emotional manipulation techniques',
+                    'Cross-referencing with fact-checking databases',
+                    'Evaluating linguistic patterns',
+                    'Finalizing credibility assessment'
+                ];
+                
+                let currentText = 0;
+                const progressBar = document.getElementById('progressBar');
+                const loadingText = document.getElementById('loadingText');
+                
+                const interval = setInterval(() => {
+                    if (currentText < loadingTexts.length) {
+                        loadingText.textContent = loadingTexts[currentText];
+                        progressBar.style.width = `${((currentText + 1) / loadingTexts.length) * 100}%`;
+                        currentText++;
+                    } else {
+                        clearInterval(interval);
+                    }
+                }, 800);
+            }
+
+            async simulateAnalysis() {
+                return new Promise(resolve => {
+                    setTimeout(resolve, 5000); // 5 second analysis time
+                });
+            }
+
+            performAnalysis(content, url) {
+                const analysis = {
+                    credibilityScore: 0,
+                    redFlags: [],
+                    sourceAnalysis: {},
+                    educationalInsights: [],
+                    recommendations: []
+                };
+
+                // Analyze content for red flags
+                const redFlagPatterns = [
+                    { pattern: /BREAKING|URGENT|SHOCKING|MIRACLE|SECRET/gi, flag: 'Sensational Headlines', severity: 'high' },
+                    { pattern: /big pharma|government cover.?up|they don't want you to know/gi, flag: 'Conspiracy Language', severity: 'high' },
+                    { pattern: /cure.{0,20}(cancer|diabetes|aids)/gi, flag: 'Unsubstantiated Medical Claims', severity: 'critical' },
+                    { pattern: /share.{0,20}before.{0,20}(removed|taken down|banned)/gi, flag: 'Urgency Manipulation', severity: 'medium' },
+                    { pattern: /anonymous.{0,20}(doctor|scientist|researcher)/gi, flag: 'Unverifiable Sources', severity: 'high' },
+                    { pattern: /click here|limited time|act now/gi, flag: 'Call-to-Action Pressure', severity: 'medium' },
+                    { pattern: /mainstream media.{0,20}(refuses|won\'t|hiding)/gi, flag: 'Media Distrust Rhetoric', severity: 'medium' }
+                ];
+
+                let totalSeverity = 0;
+                redFlagPatterns.forEach(({ pattern, flag, severity }) => {
+                    const matches = content.match(pattern);
+                    if (matches) {
+                        const severityScore = severity === 'critical' ? 4 : severity === 'high' ? 3 : severity === 'medium' ? 2 : 1;
+                        totalSeverity += severityScore * matches.length;
+                        
+                        analysis.redFlags.push({
+                            flag,
+                            severity,
+                            count: matches.length,
+                            examples: matches.slice(0, 2)
+                        });
+                    }
+                });
+
+                // Calculate credibility score (0-100, lower is more suspicious)
+                analysis.credibilityScore = Math.max(0, 100 - (totalSeverity * 8));
+
+                // Source analysis
+                analysis.sourceAnalysis = {
+                    hasAuthor: /by\s+[A-Z][a-z]+\s+[A-Z][a-z]+/i.test(content),
+                    hasDate: /\d{1,2}\/\d{1,2}\/\d{4}|\d{4}-\d{2}-\d{2}|january|february|march|april|may|june|july|august|september|october|november|december/i.test(content),
+                    hasCredentials: /dr\.|phd|professor|md|researcher/i.test(content),
+                    hasReferences: /study|research|journal|published/i.test(content),
+                    domain: url ? new URL(url).hostname : 'Not provided'
+                };
+
+                // Educational insights based on detected patterns
+                if (analysis.redFlags.some(flag => flag.flag.includes('Sensational'))) {
+                    analysis.educationalInsights.push({
+                        title: 'Sensational Headlines',
+                        description: 'Headlines using words like "SHOCKING" or "MIRACLE" are designed to grab attention and bypass critical thinking.',
+                        tip: 'Look for neutral, factual headlines from reputable sources.'
+                    });
+                }
+
+                if (analysis.redFlags.some(flag => flag.flag.includes('Medical Claims'))) {
+                    analysis.educationalInsights.push({
+                        title: 'Medical Misinformation',
+                        description: 'Claims about curing serious diseases should always be verified through peer-reviewed medical research.',
+                        tip: 'Consult healthcare professionals and check medical journals for legitimate treatments.'
+                    });
+                }
+
+                if (analysis.redFlags.some(flag => flag.flag.includes('Conspiracy'))) {
+                    analysis.educationalInsights.push({
+                        title: 'Conspiracy Rhetoric',
+                        description: 'Language suggesting widespread cover-ups often lacks evidence and appeals to distrust.',
+                        tip: 'Look for concrete evidence and multiple independent sources confirming claims.'
+                    });
+                }
+
+                // Recommendations based on score
+                if (analysis.credibilityScore < 30) {
+                    analysis.recommendations = [
+                        { action: 'Do not share this content', icon: '🚫', priority: 'high' },
+                        { action: 'Fact-check with reputable sources', icon: '🔍', priority: 'high' },
+                        { action: 'Report as potential misinformation', icon: '⚠️', priority: 'medium' },
+                        { action: 'Educate others about these red flags', icon: '📚', priority: 'low' }
+                    ];
+                } else if (analysis.credibilityScore < 60) {
+                    analysis.recommendations = [
+                        { action: 'Verify with additional sources', icon: '✅', priority: 'high' },
+                        { action: 'Check author credentials', icon: '👤', priority: 'medium' },
+                        { action: 'Look for peer-reviewed evidence', icon: '📄', priority: 'medium' }
+                    ];
+                } else {
+                    analysis.recommendations = [
+                        { action: 'Content appears relatively credible', icon: '✅', priority: 'low' },
+                        { action: 'Still verify important claims', icon: '🔍', priority: 'medium' },
+                        { action: 'Check publication date for relevance', icon: '📅', priority: 'low' }
+                    ];
+                }
+
+                return analysis;
+            }
+
+            showResults(analysis) {
+                // Store analysis for translation
+                this.lastAnalysis = analysis;
+                
+                this.loadingState.classList.add('hidden');
+                this.analysisResults.classList.remove('hidden');
+
+                // Update FAKE/REAL result badge
+                const resultIcon = document.getElementById('resultIcon');
+                const resultLabel = document.getElementById('resultLabel');
+                const resultExplanation = document.getElementById('resultExplanation');
+                const confidenceScore = document.getElementById('confidenceScore');
+                const confidenceIndicator = document.getElementById('confidenceIndicator');
+
+                // Determine if content is FAKE or REAL based on credibility score
+                const isFake = analysis.credibilityScore < 50;
+                const confidence = isFake ? (100 - analysis.credibilityScore) : analysis.credibilityScore;
+
+                if (isFake) {
+                    resultIcon.textContent = '🚨';
+                    resultLabel.textContent = 'FAKE';
+                    resultLabel.className = 'text-3xl md:text-5xl font-bold cyber-font mb-4 result-badge-fake rounded-lg py-4 px-6 inline-block';
+                    resultExplanation.className = 'mt-6 p-4 bg-red-900/30 border border-red-500/30 rounded-lg';
+                    resultExplanation.querySelector('p').className = 'text-sm text-red-200';
+                    resultExplanation.querySelector('p').textContent = 'This content shows multiple signs of misinformation including sensational headlines, conspiracy language, and unsubstantiated medical claims.';
+                } else {
+                    resultIcon.textContent = '✅';
+                    resultLabel.textContent = 'REAL';
+                    resultLabel.className = 'text-3xl md:text-5xl font-bold cyber-font mb-4 result-badge-real rounded-lg py-4 px-6 inline-block';
+                    resultExplanation.className = 'mt-6 p-4 bg-green-900/30 border border-green-500/30 rounded-lg';
+                    resultExplanation.querySelector('p').className = 'text-sm text-green-200';
+                    resultExplanation.querySelector('p').textContent = 'This content appears to be legitimate based on our analysis, though you should still verify important claims.';
+                }
+
+                // Update confidence score and indicator
+                confidenceScore.textContent = `${confidence}%`;
+                const position = (confidence / 100) * 90; // 0-90% position
+                confidenceIndicator.style.left = `${position}%`;
+
+                // Update credibility score
+                document.getElementById('credibilityScore').textContent = `${analysis.credibilityScore}/100`;
+                
+                // Position credibility indicator
+                const indicator = document.getElementById('credibilityIndicator');
+                const credPosition = (100 - analysis.credibilityScore) * 0.9; // 0-90% position
+                indicator.style.left = `${credPosition}%`;
+
+                // Update credibility explanation
+                let explanation = '';
+                let explanationClass = '';
+                
+                if (analysis.credibilityScore < 30) {
+                    explanation = this.translations[this.currentLanguage]['high_risk_explanation'] || 'HIGH RISK: This content shows multiple signs of misinformation. Exercise extreme caution and verify through reliable sources before believing or sharing.';
+                    explanationClass = 'text-red-300 bg-red-900/30 border border-red-500/30';
+                } else if (analysis.credibilityScore < 60) {
+                    explanation = this.translations[this.currentLanguage]['medium_risk_explanation'] || 'MEDIUM RISK: This content has some concerning elements. Additional verification is recommended before sharing.';
+                    explanationClass = 'text-yellow-300 bg-yellow-900/30 border border-yellow-500/30';
+                } else {
+                    explanation = this.translations[this.currentLanguage]['low_risk_explanation'] || 'LOW RISK: This content appears relatively credible, but always verify important claims through multiple sources.';
+                    explanationClass = 'text-green-300 bg-green-900/30 border border-green-500/30';
+                }
+
+                const explanationEl = document.getElementById('credibilityExplanation');
+                explanationEl.className = `rounded-lg p-3 md:p-4 ${explanationClass}`;
+                const explanationP = explanationEl.querySelector('p');
+                explanationP.textContent = explanation;
+
+                // Populate sections with translation support
+                this.populateRedFlagsWithTranslation(analysis.redFlags);
+                this.populateSourceAnalysisWithTranslation(analysis.sourceAnalysis);
+                this.populateEducationalInsightsWithTranslation(analysis.educationalInsights);
+                this.populateRecommendationsWithTranslation(analysis.recommendations);
+
+                // Animate cards
+                setTimeout(() => {
+                    document.querySelectorAll('.analysis-card').forEach((card, index) => {
+                        setTimeout(() => {
+                            card.classList.add('show');
+                        }, index * 200);
+                    });
+                }, 100);
+            }
+
+            populateRedFlagsWithTranslation(redFlags) {
+                const container = document.getElementById('redFlags');
+                
+                if (redFlags.length === 0) {
+                    const noFlagsText = this.translations[this.currentLanguage]['no_red_flags'] || 'No major red flags detected in this content.';
+                    container.innerHTML = `<div class="text-green-600 bg-green-50 p-4 rounded-lg">✅ ${noFlagsText}</div>`;
+                    return;
+                }
+
+                const severityColors = {
+                    critical: 'bg-red-100 text-red-800 border-red-200',
+                    high: 'bg-orange-100 text-orange-800 border-orange-200',
+                    medium: 'bg-yellow-100 text-yellow-800 border-yellow-200',
+                    low: 'bg-blue-100 text-blue-800 border-blue-200'
+                };
+
+                const flagTranslations = {
+                    'Sensational Headlines': 'sensational_headlines',
+                    'Conspiracy Language': 'conspiracy_language',
+                    'Unsubstantiated Medical Claims': 'medical_claims',
+                    'Urgency Manipulation': 'urgency_manipulation',
+                    'Unverifiable Sources': 'unverifiable_sources',
+                    'Call-to-Action Pressure': 'call_to_action',
+                    'Media Distrust Rhetoric': 'media_distrust'
+                };
+
+                container.innerHTML = redFlags.map(flag => {
+                    const translatedFlag = this.translations[this.currentLanguage][flagTranslations[flag.flag]] || flag.flag;
+                    const foundText = this.translations[this.currentLanguage]['found_instances'] || 'Found';
+                    const instanceText = flag.count > 1 ? 
+                        (this.translations[this.currentLanguage]['instances'] || 'instances') : 
+                        (this.translations[this.currentLanguage]['instance'] || 'instance');
+                    const examplesText = this.translations[this.currentLanguage]['examples'] || 'Examples';
+
+                    return `
+                        <div class="border-l-4 ${severityColors[flag.severity]} p-4 rounded-r-lg">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h4 class="font-semibold">${translatedFlag}</h4>
+                                    <p class="text-sm mt-1">${foundText} ${flag.count} ${instanceText}</p>
+                                    ${flag.examples.length > 0 ? `<p class="text-xs mt-2 opacity-75">${examplesText}: "${flag.examples.join('", "')}"</p>` : ''}
+                                </div>
+                                <span class="text-xs font-medium px-2 py-1 rounded-full bg-white bg-opacity-50">
+                                    ${flag.severity.toUpperCase()}
+                                </span>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                // Store educational insights with translation keys for detected red flags
+                const educationalInsights = [];
+                
+                redFlags.forEach(flag => {
+                    if (flag.flag.includes('Sensational')) {
+                        educationalInsights.push({
+                            titleKey: 'sensational_headlines',
+                            descKey: 'sensational_desc',
+                            tipKey: 'sensational_tip'
+                        });
+                    } else if (flag.flag.includes('Medical Claims')) {
+                        educationalInsights.push({
+                            titleKey: 'medical_claims',
+                            descKey: 'medical_desc',
+                            tipKey: 'medical_tip'
+                        });
+                    } else if (flag.flag.includes('Conspiracy')) {
+                        educationalInsights.push({
+                            titleKey: 'conspiracy_language',
+                            descKey: 'conspiracy_desc',
+                            tipKey: 'conspiracy_tip'
+                        });
+                    }
+                });
+
+                // Update stored analysis with translation keys
+                if (this.lastAnalysis) {
+                    this.lastAnalysis.educationalInsights = educationalInsights;
+                }
+            }
+
+            populateSourceAnalysisWithTranslation(sourceAnalysis) {
+                const container = document.getElementById('sourceAnalysis');
+                
+                const checks = [
+                    { 
+                        labelKey: 'author_identified', 
+                        value: sourceAnalysis.hasAuthor, 
+                        icon: '👤' 
+                    },
+                    { 
+                        labelKey: 'publication_date', 
+                        value: sourceAnalysis.hasDate, 
+                        icon: '📅' 
+                    },
+                    { 
+                        labelKey: 'author_credentials', 
+                        value: sourceAnalysis.hasCredentials, 
+                        icon: '🎓' 
+                    },
+                    { 
+                        labelKey: 'references_citations', 
+                        value: sourceAnalysis.hasReferences, 
+                        icon: '📚' 
+                    }
+                ];
+
+                const presentText = this.translations[this.currentLanguage]['present'] || 'Present';
+                const missingText = this.translations[this.currentLanguage]['missing'] || 'Missing';
+                const sourceDomainText = this.translations[this.currentLanguage]['source_domain'] || 'Source Domain';
+
+                container.innerHTML = `
+                    <div class="grid md:grid-cols-2 gap-4">
+                        ${checks.map(check => {
+                            const label = this.translations[this.currentLanguage][check.labelKey] || check.labelKey;
+                            return `
+                                <div class="flex items-center space-x-3 p-3 rounded-lg ${check.value ? 'bg-green-50' : 'bg-red-50'}">
+                                    <span class="text-xl">${check.icon}</span>
+                                    <div>
+                                        <p class="font-medium ${check.value ? 'text-green-800' : 'text-red-800'}">${label}</p>
+                                        <p class="text-sm ${check.value ? 'text-green-600' : 'text-red-600'}">
+                                            ${check.value ? '✅ ' + presentText : '❌ ' + missingText}
+                                        </p>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                    ${sourceAnalysis.domain !== 'Not provided' ? `
+                        <div class="mt-4 p-3 bg-gray-50 rounded-lg">
+                            <p class="text-sm"><strong>${sourceDomainText}:</strong> ${sourceAnalysis.domain}</p>
+                        </div>
+                    ` : ''}
+                `;
+            }
+
+            populateEducationalInsightsWithTranslation(insights) {
+                const container = document.getElementById('educationalInsights');
+                let displayInsights = insights;
+                
+                if (displayInsights.length === 0) {
+                    displayInsights = [{
+                        titleKey: 'general_verification',
+                        descKey: 'general_verification_desc',
+                        tipKey: 'general_verification_tip'
+                    }];
+                }
+
+                container.innerHTML = displayInsights.map(insight => {
+                    const title = insight.titleKey ? 
+                        (this.translations[this.currentLanguage][insight.titleKey] || insight.title) : 
+                        insight.title;
+                    const description = insight.descKey ? 
+                        (this.translations[this.currentLanguage][insight.descKey] || insight.description) : 
+                        insight.description;
+                    const tip = insight.tipKey ? 
+                        (this.translations[this.currentLanguage][insight.tipKey] || insight.tip) : 
+                        insight.tip;
+
+                    return `
+                        <div class="border border-blue-200 rounded-lg p-4 bg-blue-50">
+                            <h4 class="font-semibold text-blue-800 mb-2">${title}</h4>
+                            <p class="text-blue-700 text-sm mb-2">${description}</p>
+                            <div class="bg-blue-100 rounded p-3 mt-3">
+                                <p class="text-xs text-blue-800"><strong>💡 Tip:</strong> ${tip}</p>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            populateRecommendationsWithTranslation(recommendations) {
+                const container = document.getElementById('recommendations');
+                
+                const priorityColors = {
+                    high: 'bg-red-50 border-red-200 text-red-800',
+                    medium: 'bg-yellow-50 border-yellow-200 text-yellow-800',
+                    low: 'bg-green-50 border-green-200 text-green-800'
+                };
+
+                const actionTranslations = {
+                    'Do not share this content': 'do_not_share',
+                    'Fact-check with reputable sources': 'fact_check',
+                    'Report as potential misinformation': 'report_misinfo',
+                    'Educate others about these red flags': 'educate_others',
+                    'Verify with additional sources': 'verify_additional',
+                    'Check author credentials': 'check_credentials',
+                    'Look for peer-reviewed evidence': 'peer_reviewed',
+                    'Content appears relatively credible': 'appears_credible',
+                    'Still verify important claims': 'verify_claims',
+                    'Check publication date for relevance': 'check_date'
+                };
+
+                const priorityTranslations = {
+                    'high': 'high_priority',
+                    'medium': 'medium_priority',
+                    'low': 'low_priority'
+                };
+
+                container.innerHTML = recommendations.map(rec => {
+                    const translatedAction = this.translations[this.currentLanguage][actionTranslations[rec.action]] || rec.action;
+                    const translatedPriority = this.translations[this.currentLanguage][priorityTranslations[rec.priority]] || rec.priority.toUpperCase() + ' PRIORITY';
+
+                    return `
+                        <div class="flex items-center space-x-3 p-4 border rounded-lg ${priorityColors[rec.priority]}">
+                            <span class="text-2xl">${rec.icon}</span>
+                            <div class="flex-1">
+                                <p class="font-medium">${translatedAction}</p>
+                                <p class="text-xs opacity-75 mt-1">${translatedPriority}</p>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', () => {
+            new MisinformationDetector();
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'97ee55b0c4017f74',t:'MTc1NzgzNjY1OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
