@@ -44,7 +44,8 @@ Check out the live demo here: [TruthGuard Live](https://cheery-syrniki-6c2e7e.ne
 ## 📂 Project Structure
 ├── index.html # Main frontend file
 
----## ✨ Future Enhancements
+---
+## ✨ Future Enhancements
 
 - Add AI backend for real-time analysis
 - Expand multi-language support
