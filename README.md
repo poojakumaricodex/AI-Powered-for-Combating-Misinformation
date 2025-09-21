@@ -53,4 +53,11 @@ Check out the live demo here: [TruthGuard Live](https://cheery-syrniki-6c2e7e.ne
 
 ---
 
+## 📄 License
+
+This project is licensed under the MIT License.  
+
+Copyright (c) 2025 Peraka Sai Priya, Pooja Kumari, Gorile Shailaja, Akhil Budige, Hemanth Kumar Kurakula  
+
+See the [LICENSE](LICENSE) file for more details.
 
